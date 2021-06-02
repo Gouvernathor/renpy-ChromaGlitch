@@ -6,8 +6,6 @@ A way to display images (or other displayables) with a DDLC-like glitch effect o
 
 The `glitch.rpy` file contains the code itself.
 
-The `script.rpy` file contains an example as to how to use it.
-
 ## Howto
 `glitch` is a function that can be used as a transform (because it takes a displayable as lone argument and returns a displayable).
 Its 6 parameters are :
