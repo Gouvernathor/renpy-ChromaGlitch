@@ -1,4 +1,4 @@
-transform chromatic_offset(child, chzoom=1.01, center=(.5, .5)):
+transform chromatic_offset(child, chzoom=1.01):
     Fixed(
           Transform(child, alpha=.0),
           Transform(child, xalign=.0, xzoom=chzoom, gl_color_mask=(False, False, True, True)),
