@@ -10,18 +10,19 @@ transform chromatic_offset(child, chzoom=1.01):
 
 init python:
     def glitch(child, randomobj=renpy.random.Random(), chroma=None, minbandheight=1, offset=30, crop=False):
-        chroma = renpy.display.render.models if chroma is None else chroma
-        # largeur et hauteur du child
+        if chroma is None and renpy.display.render.models:
+            chroma = True
+        # child's width and height
         cwidth, cheight = renpy.render(child, 0, 0, 0, 0).get_size()
-        if not cwidth or not cheight:
+        if not (cwidth and cheight):
             return child
-        lizt = [] # liste de tranches
-        offt = 0 # offset latéral de la prochaine tranche
+        lizt = [] # liste of strips
+        offt = 0 # next strip's lateral offset
         theights = [randomobj.randint(0, cheight) for k in range(min(cheight, randomobj.randint(20, 40)//2))]
-        theights.sort() # les ordonnées qui délimiteront les bandes
-        fheight = 0 # la somme de la taille de tous les morceaux ajoutés pour l'instant
+        theights.sort() # coordinates demarcating all the strips
+        fheight = 0 # sum of the size of all the strips added this far
         while fheight<cheight:
-            # theight c'est la hauteur du morceau
+            # theight is the height of this particular strip
             theight = max(theights.pop(0)-fheight, minbandheight) if theights else cheight-theight
             band = Transform(child,
                              crop=(-offt, fheight, cwidth, theight),
