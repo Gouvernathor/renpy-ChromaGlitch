@@ -13,6 +13,7 @@ init python:
         if chroma is None and renpy.display.render.models:
             chroma = True
         # child's width and height
+        child = renpy.easy.displayable(child)
         cwidth, cheight = renpy.render(child, 0, 0, 0, 0).get_size()
         if not (cwidth and cheight):
             return child
