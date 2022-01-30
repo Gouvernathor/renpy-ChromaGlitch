@@ -16,13 +16,20 @@ Its 6 parameters are :
 - `offset` : a positive integer. The actual offset given to a glitched slice will be comprised between -offset and offset. Defaults to 30.
 - `crop` : boolean indicating whether or not to crop the resulting image to make it fit the size of the original image. Defaults to False.
 
-Then, you can define your glitched image as an image to show afterward, using `image glitched = glitch("beautifulcharacter angry")`, or you can also directly show it using `show expression glitch("beautifulcharacter angry") as beautifulcharacter` (I strongly recommand using the `as` clause).
-You can also apply it as a transform, with `show eileen at glitch` or `show eileen at renpy.curry(glitch)(chroma=False)` or even `show layer master at glitch`.
+Then, you can directly show it using `show expression At("eileen happy", glitch) as beautifulcharacter` (I strongly recommand using the `as` clause).
+You can also apply it as a transform, with `show eileen at glitch` or `show eileen at renpy.partial(glitch, chroma=False)` or even `show layer master at glitch`.
+
+Unfortunately, due to the weird way I'm computing the size of the input image, you can't define images by simply using the `image x =` statement.
+Instead, you must use the ATL version of the image statement, like so :
+```rpy
+image eileen glitched:
+    At("eileen happy", glitch)
+```
 
 ## Chromatic aberration
 
 The chromatic_offset transform can be used on a standalone basis, especially to apply it to the master layer with `show layer master at chromatic_offset`.
-The aberration effect is applied laterally, on a technical nothe the red, green and blue layers of the image are stretch horizontally and then offset laterally with different values.
+The aberration effect is applied laterally, on a technical note the the red, green and blue layers of the image are stretch horizontally and then offset laterally with different values.
 It takes one optional parameter, chzoom, which determines by exactly how much the layers are stretched. At 1.0 the layers are not streched and the effect is invisible, at lower that 1.0 the left and right boundaries are visible on the sides of the image, so advised values are greater than but close to 1.0. Default is 1.01.
 
 ## Terms of use
