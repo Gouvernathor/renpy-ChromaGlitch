@@ -29,8 +29,8 @@ image eileen glitched:
 ## Chromatic aberration
 
 The chromatic_offset transform can be used on a standalone basis, especially to apply it to the master layer with `show layer master at chromatic_offset`.
-The aberration effect is applied laterally, on a technical note the the red, green and blue layers of the image are stretch horizontally and then offset laterally with different values.
-It takes one optional parameter, chzoom, which determines by exactly how much the layers are stretched. At 1.0 the layers are not streched and the effect is invisible, at lower that 1.0 the left and right boundaries are visible on the sides of the image, so advised values are greater than but close to 1.0. Default is 1.01.
+The aberration effect is applied laterally, on a technical note the red, green and blue layers of the image are stretched horizontally and then offset laterally with different values.
+It takes one optional parameter, chzoom, which determines exactly how much the layers are stretched. At 1.0 the layers are not streched and the effect is invisible, at lower that 1.0 the left and right boundaries are visible on the sides of the image, so advised values are greater than but close to 1.0. Default is 1.01.
 
 ## Terms of use
-Use it freely in any project, just drop my name in the credits with a link to this repo if you liked it 🥰
+Use it freely in any project. If you liked it, you can drop my name in the credits with a link to this repo 🥰
