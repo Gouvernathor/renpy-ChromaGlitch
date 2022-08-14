@@ -43,8 +43,6 @@ init python:
                 if chroma:
                     band = chromatic_offset(band, chzoom=1.0+.5*offt/cwidth)
                 band = Transform(band, pos=(offt, absolute(fheight)))
-                if chroma:
-                    band = chromatic_offset(Flatten(band), chzoom=1.0+.5*offt/cwidth)
                 lizt.append(band)
                 fheight += theight
                 if offt:
