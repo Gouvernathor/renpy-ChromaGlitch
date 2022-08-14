@@ -10,22 +10,23 @@ transform chromatic_offset(child, chzoom=1.01):
 
 init python:
     class glitch(renpy.Displayable):
-        def __init__(self, child, *args, **kwargs):
+        def __init__(self, child, *args, randomkey=None, **kwargs):
             super().__init__()
             self.child = renpy.displayable(child)
             self.args = args
+            self.randomkey = randomkey
             self.kwargs = kwargs
 
         def render(self, width, height, st, at):
             cwidth, cheight = renpy.render(self.child, width, height, st, at).get_size()
             return renpy.render(self.glitch(self.child,
-                                            cwidth, cheight,
+                                            cwidth, cheight, renpy.random.Random(self.randomkey),
                                             *self.args, **self.kwargs),
                                 width, height,
                                 st, at)
 
         @staticmethod
-        def glitch(child, cwidth, cheight, randomobj=renpy.random, chroma=True, minbandheight=1, offset=30, crop=False):
+        def glitch(child, cwidth, cheight, randomobj, chroma=True, minbandheight=1, offset=30, crop=False):
             chroma &= renpy.display.render.models
             if not (cwidth and cheight):
                 return child
