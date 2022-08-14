@@ -11,9 +11,17 @@ transform chromatic_offset(child, chzoom=1.01):
 init python:
     class glitch(renpy.Displayable):
         def __init__(self, child, *args, **kwargs):
+            super().__init__()
             self.child = renpy.displayable(child)
             self.args = args
             self.kwargs = kwargs
+
+        def render(self, width, height, st, at):
+            return renpy.render(self.glitch(self.child,
+                                            width, height,
+                                            *self.args, **self.kwargs),
+                                width, height,
+                                st, at)
 
         @staticmethod
         def glitch(child, cwidth, cheight, randomobj=renpy.random.Random(), chroma=None, minbandheight=1, offset=30, crop=False):
@@ -29,9 +37,14 @@ init python:
             fheight = 0 # sum of the size of all the strips added this far
             while fheight<cheight:
                 # theight is the height of this particular strip
-                theight = max(theights.pop(0)-fheight, minbandheight) if theights else cheight-theight
+                if theights:
+                    theight = max(theights.pop(0)-fheight, minbandheight)
+                else:
+                    cheight-theight
                 band = Transform(child,
-                                 crop=(-offt, fheight, cwidth, theight),
+                                 # crop=(-offt, fheight, cwidth, theight),
+                                 crop=(0, fheight, cwidth, theight),
+                                 xoffset=offt,
                                  )
                 if chroma:
                     band = chromatic_offset(Flatten(band), chzoom=1.0+.5*offt/cwidth)
@@ -48,9 +61,6 @@ init python:
                          crop_relative=crop or False,
                          crop=crop and (0, 0, 1.0, 1.0),
                          )
-
-        def render(self, width, height, st, at):
-            return renpy.render(self.glitch(child, width, height, *args, **kwargs))
 
         def __eq__(self, other):
             return (type(self) == type(other)) and (self.args == other.args) and (self.kwargs == other.kwargs)
