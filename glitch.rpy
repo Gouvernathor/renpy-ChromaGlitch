@@ -39,11 +39,10 @@ init python:
                     theight = max(theights.pop(0)-fheight, minbandheight)
                 else:
                     theight = cheight-theight
-                band = Transform(child,
-                                 # crop=(-offt, fheight, cwidth, theight),
-                                 crop=(0, fheight, cwidth, theight),
-                                 xoffset=offt,
-                                 )
+                band = Transform(child, crop=(0, fheight, cwidth, theight))
+                if chroma:
+                    band = chromatic_offset(band, chzoom=1.0+.5*offt/cwidth)
+                band = Transform(band, pos=(offt, absolute(fheight)))
                 if chroma:
                     band = chromatic_offset(Flatten(band), chzoom=1.0+.5*offt/cwidth)
                 lizt.append(band)
@@ -54,7 +53,7 @@ init python:
                     offt = randomobj.randint(-offset, offset)
             crop = crop or None
             return Fixed(Transform(child, alpha=.0),
-                         VBox(*lizt),
+                         *lizt,
                          fit_first=True,
                          crop_relative=crop or False,
                          crop=crop and (0, 0, 1.0, 1.0),
