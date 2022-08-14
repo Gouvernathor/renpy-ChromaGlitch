@@ -17,8 +17,9 @@ init python:
             self.kwargs = kwargs
 
         def render(self, width, height, st, at):
+            cwidth, cheight = renpy.render(self.child, width, height, st, at).get_size()
             return renpy.render(self.glitch(self.child,
-                                            width, height,
+                                            cwidth, cheight,
                                             *self.args, **self.kwargs),
                                 width, height,
                                 st, at)
