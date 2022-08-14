@@ -10,8 +10,8 @@ The `glitch.rpy` file contains the code itself.
 `glitch` is a transform (because it takes a displayable and returns a displayable).
 Its 6 parameters are :
 - `child` : the displayable (~= image) on which the effect is applied. This is the only required argument.
-- `randomobj` : the random object used to generate the slices heights and offsets.
-- `chroma` : boolean indicating whether or not to apply chromatic aberration effects to the glitched tranches. Defaults to True if the system can manage it (which needs gl2 or another model-based renderer to work).
+- `randomkey` : the key given to the random object used to generate the slices heights and offsets. This must match [the random module's specfications](https://docs.python.org/3/library/random.html#random.seed). A given image glitched with a given non-None key will always, always, look the same. A glitched image with no key, or with a None key, will look differently every time Ren'Py renders it. Use this to make the glitching reliable (in an animation for example). Defaults to None, and this is a keyword-only argument because reasons.
+- `chroma` : boolean indicating whether or not to apply chromatic aberration effects to the glitched tranches. Defaults to True.
 - `minbandheight` : minimum height of a slice, in pixels. Defaults to 1.
 - `offset` : a positive integer. The actual offset given to a glitched slice will be comprised between -offset and +offset. Defaults to 30.
 - `crop` : boolean indicating whether or not to crop the resulting image to make it fit the size of the original image. Defaults to False.
