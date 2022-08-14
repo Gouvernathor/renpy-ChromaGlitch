@@ -25,10 +25,8 @@ init python:
                                 st, at)
 
         @staticmethod
-        def glitch(child, cwidth, cheight, randomobj=renpy.random.Random(), chroma=None, minbandheight=1, offset=30, crop=False):
-            if chroma is None and renpy.display.render.models:
-                chroma = True
-            # child's width and height
+        def glitch(child, cwidth, cheight, randomobj=renpy.random, chroma=True, minbandheight=1, offset=30, crop=False):
+            chroma &= renpy.display.render.models
             if not (cwidth and cheight):
                 return child
             lizt = [] # liste of strips
