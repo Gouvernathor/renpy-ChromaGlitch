@@ -31,15 +31,14 @@ init python:
                 return child
             lizt = [] # liste of strips
             offt = 0 # next strip's lateral offset
-            theights = [randomobj.randint(0, cheight) for k in range(min(cheight, randomobj.randint(20, 40)//2))]
-            theights.sort() # coordinates demarcating all the strips
+            theights = sorted(randomobj.randint(0, cheight) for k in range(min(cheight, randomobj.randint(10, 20)))) # y coordinates demarcating all the strips
             fheight = 0 # sum of the size of all the strips added this far
             while fheight<cheight:
                 # theight is the height of this particular strip
                 if theights:
                     theight = max(theights.pop(0)-fheight, minbandheight)
                 else:
-                    cheight-theight
+                    theight = cheight-theight
                 band = Transform(child,
                                  # crop=(-offt, fheight, cwidth, theight),
                                  crop=(0, fheight, cwidth, theight),
