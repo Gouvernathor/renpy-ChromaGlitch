@@ -28,5 +28,15 @@ The chromatic_offset transform can be used on a standalone basis, especially to 
 The aberration effect is applied laterally, on a technical note the red, green and blue layers of the image are stretched horizontally and then offset laterally with different values.
 It takes one optional parameter, chzoom, which determines exactly how much the layers are stretched. At 1.0 the layers are not streched and the effect is invisible, at lower than 1.0 the left and right boundaries are visible on the sides of the image, so advised values are greater than but close to 1.0. Default is 1.01.
 
+## Squares glitch
+
+![](sample_squares.png)
+
+This is a second type of glitch, which cuts the image into squares and does things to them.
+It takes `child` and `randomkey`, which are the same as for the preceding glitch, and three aditional parameters.
+- `squareside` : the size, in pixels, of the side of the squares the image will be cut to. This will be adjusted so that all the squares have the same size. Defaults to 20.
+- `chroma` : the probability (0. - 1.) for each square to get a chromatic glitch. Defaults to .25.
+- `permutes` : the percentage (0. - 1.) of squares which will change places with other squares. Defaults to a random percentage between 10% and 40%.
+
 ## Terms of use
 Use it freely in any project. If you liked it, you can drop my name in the credits with a link to this repo 🥰
