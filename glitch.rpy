@@ -43,7 +43,7 @@ init python:
                 band = Transform(child, crop=(0, fheight, cwidth, theight))
                 if chroma:
                     band = chromatic_offset(band, chzoom=1.0+.5*offt/cwidth)
-                band = Transform(band, pos=(offt, absolute(fheight)))
+                band = Transform(band, pos=(offt, absolute(fheight)), subpixel=True)
                 lizt.append(band)
                 fheight += theight
                 if offt:
@@ -78,7 +78,9 @@ init python:
             for y in range(nrows):
                 for x in range(ncols):
                     lizt.append(Transform(child,
-                                          crop=(absolute(x*square_width), absolute(y*square_height), square_width, square_height)))
+                                          crop=(absolute(x*square_width), absolute(y*square_height), square_width, square_height),
+                                          subpixel=True,
+                                          ))
 
             if permutes is None:
                 permutes = randomobj.randrange(10, 40)/100 # between 10% and 40%
