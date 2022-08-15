@@ -60,3 +60,40 @@ init python:
 
         def __eq__(self, other):
             return (type(self) == type(other)) and (self.args == other.args) and (self.kwargs == other.kwargs)
+
+    class squares_glitch(glitch):
+        @staticmethod
+        def glitch(child, cwidth, cheight, randomobj, squareside=20, chroma=.25, permutes=None):
+            if not renpy.display.render.models:
+                chroma = False
+            if not (cwidth and cheight):
+                return child
+
+            ncols = round(cwidth/squareside)
+            nrows = round(cheight/squareside)
+            square_width = absolute(cwidth/ncols)
+            square_height = absolute(cheight/nrows)
+
+            lizt = []
+            for y in range(nrows):
+                for x in range(ncols):
+                    lizt.append(Transform(child,
+                                          crop=(absolute(x*square_width), absolute(y*square_height), square_width, square_height)))
+
+            if permutes is None:
+                permutes = randomobj.randrange(10, 40)/100 # between 10% and 40%
+            permutes = round(permutes*ncols*nrows)
+            permute_a = randomobj.sample(range(ncols*nrows), permutes)
+            permute_b = randomobj.sample(range(ncols*nrows), permutes)
+
+            for a, b in zip(permute_a, permute_b):
+                lizt[a], lizt[b] = lizt[b], lizt[a]
+
+            for k, el in enumerate(lizt):
+                if randomobj.random() < chroma:
+                    lizt[k] = Transform(el,
+                                        gl_color_mask=(randomobj.random()<.33, randomobj.random()<.33, randomobj.random()<.33, True),
+                                        # matrixcolor=HueMatrix(randomobj.random()*360),
+                                        )
+
+            return Grid(ncols, nrows, *lizt)
