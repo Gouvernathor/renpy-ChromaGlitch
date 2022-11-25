@@ -1,6 +1,8 @@
 # renpy-ChromaGlitch
 A way to display images (or other displayables) with a DDLC-like glitch effect offsetting slices of the image laterally and optionally adding chromatic aberration effects on the glitched slices.
 
+These effects were featured in [this YouTube video](https://www.youtube.com/watch?v=H2eg010UozE) by Visual Novel Design. Thanks to him !
+
 ![](sample_nochroma.png)
 ![](sample_chroma.png)
 
@@ -10,7 +12,7 @@ The `glitch.rpy` file contains the code itself.
 `glitch` is a transform (because it takes a displayable and returns a displayable).
 Its 6 parameters are :
 - `child` : the displayable (~= image) on which the effect is applied. This is the only required argument.
-- `randomkey` : the key given to the random object used to generate the slices heights and offsets. This must match [the random module's specfications](https://docs.python.org/3/library/random.html#random.seed). A given image glitched with a given non-None key will always, always, look the same. A glitched image with no key, or with a None key, will look differently every time Ren'Py renders it. Use this to make the glitching reliable (in an animation for example). Defaults to None, and this is a keyword-only argument because reasons.
+- `randomkey` : the key given to the random object used to generate the slices heights and offsets. This must match [the random module's specifications](https://docs.python.org/3/library/random.html#random.seed). A given image glitched with a given non-None key will always, always, look the same. A glitched image with no key, or with a None key, will look differently every time Ren'Py renders it. Use this to make the glitching reliable (in an animation for example). Defaults to None, and this is a keyword-only argument because reasons.
 - `chroma` : boolean indicating whether or not to apply chromatic aberration effects to the glitched tranches. Defaults to True.
 - `minbandheight` : minimum height of a slice, in pixels. Defaults to 1.
 - `offset` : a positive integer. The actual offset given to a glitched slice will be comprised between -offset and +offset. Defaults to 30.
@@ -21,6 +23,16 @@ You can also apply it as a transform, with `show eileen at glitch` or `show eile
 
 It is also possible to define it directly as an image, simply using `image eileen glitched = glitch("eileen", offset=20)`
 (it was not possible in previous versions of ChromaGlitch, but now it's fixed).
+
+Example :
+```rpy
+image eileen glitched:
+    glitch("eileen happy", randomkey=83468468) # reliable slicing
+    pause 1.0
+    glitch("eileen happy", offset=60) # bigger and always-random slicing
+    pause 0.1
+    repeat
+```
 
 ## Chromatic aberration
 
