@@ -1,6 +1,9 @@
 # renpy-ChromaGlitch
 A way to display images (or other displayables) with a DDLC-like glitch effect offsetting slices of the image laterally and optionally adding chromatic aberration effects on the glitched slices.
 
+Warning : applying glitch on animations (ATL) is only partially supported, this is meant to be applied to still images. See [#4](https://github.com/Gouvernathor/renpy-ChromaGlitch/issues/4) for more details.
+Applying the glitch effect to *make* an animation however is very possible, see the example below.
+
 These effects were featured in [this YouTube video](https://www.youtube.com/watch?v=H2eg010UozE) by Visual Novel Design. Thanks to him !
 
 ![](sample_nochroma.png)
@@ -11,8 +14,8 @@ The `glitch.rpy` file contains the code itself.
 ## Howto glitch
 `glitch` is a transform (because it takes a displayable and returns a displayable).
 Its 6 parameters are :
-- `child` : the displayable (~= image) on which the effect is applied. This is the only required argument.
-- `randomkey` : the key given to the random object used to generate the slices heights and offsets. This must match [the random module's specifications](https://docs.python.org/3/library/random.html#random.seed). A given image glitched with a given non-None key will always, always, look the same. A glitched image with no key, or with a None key, will look differently every time Ren'Py renders it. Use this to make the glitching reliable (in an animation for example). Defaults to None, and this is a keyword-only argument because reasons.
+- `child` : the displayable (~= image) on which the effect is applied. This is the only required argument, all others are keyword-only.
+- `randomkey` : the key given to the random object used to generate the slices heights and offsets. This must match [the random module's specifications](https://docs.python.org/3/library/random.html#random.seed). A given image glitched with a given non-None key will always, always, look the same. A glitched image with a None key (the default) will look differently every time Ren'Py renders it. Use this to make the glitching reliable (in an animation for example). Defaults to None.
 - `chroma` : boolean indicating whether or not to apply chromatic aberration effects to the glitched tranches. Defaults to True.
 - `minbandheight` : minimum height of a slice, in pixels. Defaults to 1.
 - `offset` : a positive integer. The actual offset given to a glitched slice will be comprised between -offset and +offset. Defaults to 30.
