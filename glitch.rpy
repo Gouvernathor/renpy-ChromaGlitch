@@ -10,6 +10,65 @@ transform chromatic_offset(child, chzoom=1.01):
 
 init python:
     class glitch(renpy.Displayable):
+        transformedcache = None # typing: Dict[Tuple[int, int], Dict[int, renpy.Displayable]]
+
+        def __init__(self, child, *, randomkey=None, chroma=True, minbandheight=1, offset=30, **properties):
+            super().__init__(**properties)
+            self.child = child = renpy.displayable(child)
+            self.randomkey = randomkey
+            self.chroma = chroma
+            self.minbandheight = minbandheight
+            self.offset = offset
+            if chroma:
+                self.transformedcache = {}
+
+        def render(self, width, height, st, at):
+            child = self.child
+            child_render = renpy.render(child, width, height, st, at)
+            cwidth, cheight = child_render.get_size()
+            if not (cwidth and cheight):
+                return child
+            render = renpy.Render(cwidth, cheight)
+            randomobj = renpy.random.Random(self.randomkey)
+            chroma = self.chroma and renpy.display.render.models
+            offset = self.offset
+
+            if chroma:
+                if self.transformedcache is None:
+                    self.transformedcache = {}
+                cache = self.transformedcache.get((width, height), None)
+                if cache is None:
+                    cache = self.transformedcache[width, height] = {offt : chromatic_offset(child, chzoom=1.0+.5*offt/cwidth) for offt in range(-offset, offset+1)}
+
+            offt = 0 # next strip's lateral offset
+            theights = sorted(randomobj.randrange(cheight+1) for k in range(min(cheight, randomobj.randrange(10, 21)))) # y coordinates demarcating all the strips
+            fheight = 0 # sum of the size of all the strips added this far
+            crender = child_render
+            while fheight<cheight:
+                # theight is the height of this particular strip
+                if theights:
+                    theight = max(theights.pop(0)-fheight, self.minbandheight)
+                else:
+                    theight = cheight-theight
+
+                if offt and chroma:
+                    # crender = renpy.render(chromatic_offset(child, chzoom=1.0+.5*offt/cwidth), width, height, st, at)
+                    crender = renpy.render(cache[offt], width, height, st, at)
+
+                render.blit(crender.subsurface((0, fheight, cwidth, theight)), (offt, round(fheight)))
+                fheight += theight
+                if offt:
+                    offt = 0
+                    crender = child_render
+                else:
+                    offt = randomobj.randrange(-offset, offset+1)
+
+            return render
+
+        def visit(self):
+            return [self.child]
+
+    class squares_glitch(glitch):
         def __init__(self, child, *args, randomkey=None, **kwargs):
             super().__init__()
             self.child = renpy.displayable(child)
@@ -25,43 +84,6 @@ init python:
                                 width, height,
                                 st, at)
 
-        @staticmethod
-        def glitch(child, cwidth, cheight, randomobj, chroma=True, minbandheight=1, offset=30, crop=False):
-            chroma &= renpy.display.render.models
-            if not (cwidth and cheight):
-                return child
-            lizt = [] # liste of strips
-            offt = 0 # next strip's lateral offset
-            theights = sorted(randomobj.randint(0, cheight) for k in range(min(cheight, randomobj.randint(10, 20)))) # y coordinates demarcating all the strips
-            fheight = 0 # sum of the size of all the strips added this far
-            while fheight<cheight:
-                # theight is the height of this particular strip
-                if theights:
-                    theight = max(theights.pop(0)-fheight, minbandheight)
-                else:
-                    theight = cheight-theight
-                band = Transform(child, crop=(0, fheight, cwidth, theight))
-                if chroma:
-                    band = chromatic_offset(band, chzoom=1.0+.5*offt/cwidth)
-                band = Transform(band, pos=(offt, absolute(fheight)), subpixel=True)
-                lizt.append(band)
-                fheight += theight
-                if offt:
-                    offt = 0
-                else:
-                    offt = randomobj.randint(-offset, offset)
-            crop = crop or None
-            return Fixed(Transform(child, alpha=.0),
-                         *lizt,
-                         fit_first=True,
-                         crop_relative=crop or False,
-                         crop=crop and (0, 0, 1.0, 1.0),
-                         )
-
-        def __eq__(self, other):
-            return (type(self) == type(other)) and (self.args == other.args) and (self.kwargs == other.kwargs)
-
-    class squares_glitch(glitch):
         @staticmethod
         def glitch(child, cwidth, cheight, randomobj, squareside=20, chroma=.25, permutes=None):
             if not renpy.display.render.models:
@@ -99,3 +121,6 @@ init python:
                                         )
 
             return Grid(ncols, nrows, *lizt)
+
+        def __eq__(self, other):
+            return (type(self) == type(other)) and (self.args == other.args) and (self.kwargs == other.kwargs)
