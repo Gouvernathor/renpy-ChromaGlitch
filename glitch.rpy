@@ -9,6 +9,8 @@ transform chromatic_offset(child, chzoom=1.01):
     crop_relative True
 
 init python:
+    import weakref
+
     class glitch(renpy.Displayable):
         def __init__(self, child, *, randomkey=None, chroma=True, minbandheight=1, offset=30, **properties):
             super().__init__(**properties)
@@ -17,6 +19,31 @@ init python:
             self.chroma = chroma
             self.minbandheight = minbandheight
             self.offset = offset
+            if chroma:
+                self.transformedcache = self._Cache(self) # typing: glitch._Cache[Tuple[int, int, int], renpy.Displayable]
+                self.cwidthcache = {} # typing: Dict[Tuple[int, int], int]
+
+        class _Cache(dict):
+            # this class seems picklable ? is as far as my tests go, but it's somewhat surprising
+            # self is the _Cache instance, g is the (weakref to the) glitch instance
+            def __init__(self, g):
+                self.g = weakref.ref(g) # avoid a circular reference
+
+            def __missing__(self, key):
+                width, height, offt = key
+                g = self.g()
+                self[key] = rv = chromatic_offset(g.child, chzoom=1.0+.5*offt/g.cwidthcache[width, height])
+                return rv
+
+            # pickling the weakref
+            def __getstate__(self):
+                state = super().__getstate__()
+                state['g'] = self.g()
+                return state
+
+            def __setstate__(self, state):
+                self.g = weakref.ref(state.pop('g'))
+                super().__setstate__(state)
 
         def render(self, width, height, st, at):
             child = self.child
@@ -29,6 +56,11 @@ init python:
             chroma = self.chroma and renpy.display.render.models
             offset = self.offset
             minbandheight = self.minbandheight
+
+            if chroma:
+                self.cwidthcache[width, height] = cwidth
+                cache = self.transformedcache
+
             offt = 0 # next strip's lateral offset
             theights = sorted(randomobj.randrange(cheight+1) for k in range(min(cheight, randomobj.randrange(10, 21)))) # y coordinates demarcating all the strips
             fheight = 0 # sum of the size of all the strips added this far
@@ -41,7 +73,8 @@ init python:
                     theight = cheight-theight
 
                 if offt and chroma:
-                    crender = renpy.render(chromatic_offset(child, chzoom=1.0+.5*offt/cwidth), width, height, st, at)
+                    # crender = renpy.render(chromatic_offset(child, chzoom=1.0+.5*offt/cwidth), width, height, st, at)
+                    crender = renpy.render(cache[width, height, offt], width, height, st, at)
 
                 render.blit(crender.subsurface((0, fheight, cwidth, theight)), (offt, round(fheight)))
                 fheight += theight
