@@ -28,6 +28,7 @@ init python:
             randomobj = renpy.random.Random(self.randomkey)
             chroma = self.chroma and renpy.display.render.models
             offset = self.offset
+            minbandheight = self.minbandheight
             offt = 0 # next strip's lateral offset
             theights = sorted(randomobj.randrange(cheight+1) for k in range(min(cheight, randomobj.randrange(10, 21)))) # y coordinates demarcating all the strips
             fheight = 0 # sum of the size of all the strips added this far
@@ -35,7 +36,7 @@ init python:
             while fheight<cheight:
                 # theight is the height of this particular strip
                 if theights:
-                    theight = max(theights.pop(0)-fheight, self.minbandheight)
+                    theight = max(theights.pop(0)-fheight, minbandheight)
                 else:
                     theight = cheight-theight
 
