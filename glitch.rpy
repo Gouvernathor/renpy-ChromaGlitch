@@ -87,7 +87,10 @@ init python:
             return render
 
         def visit(self):
-            return [self.child]
+            rv = [self.child]
+            if self.chroma:
+                rv.extend(self.transformedcache.values())
+            return rv
 
     class squares_glitch(renpy.Displayable):
         def __init__(self, child, *args, randomkey=None, **kwargs):
