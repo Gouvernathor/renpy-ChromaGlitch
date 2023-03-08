@@ -1,18 +1,8 @@
-transform chromatic_offset(child, chzoom=1.01):
-    Fixed(
-          Transform(child, alpha=.0),
-          Transform(child, xalign=.0, xzoom=chzoom, gl_color_mask=(False, False, True, True)),
-          Transform(child, xalign=.5, xzoom=chzoom, gl_color_mask=(False, True, False, True)),
-          Transform(child, xalign=1.0, xzoom=chzoom, gl_color_mask=(True, False, False, True)),
-          fit_first=True)
-    crop (.0, .0, 1.0, 1.0)
-    crop_relative True
-
 init python:
     class glitch(renpy.Displayable):
         def __init__(self, child, *, randomkey=None, chroma=True, minbandheight=1, offset=30, **properties):
             super().__init__(**properties)
-            self.child = child = renpy.displayable(child)
+            self.child = renpy.displayable(child)
             self.randomkey = randomkey
             self.chroma = chroma
             self.minbandheight = minbandheight
@@ -29,10 +19,10 @@ init python:
             chroma = self.chroma and renpy.display.render.models
             offset = self.offset
             minbandheight = self.minbandheight
-            offt = 0 # next strip's lateral offset
+
             theights = sorted(randomobj.randrange(cheight+1) for k in range(min(cheight, randomobj.randrange(10, 21)))) # y coordinates demarcating all the strips
+            offt = 0 # next strip's lateral offset
             fheight = 0 # sum of the size of all the strips added this far
-            crender = child_render
             while fheight<cheight:
                 # theight is the height of this particular strip
                 if theights:
@@ -40,14 +30,20 @@ init python:
                 else:
                     theight = cheight-theight
 
-                if offt and chroma:
-                    crender = renpy.render(chromatic_offset(child, chzoom=1.0+.5*offt/cwidth), width, height, st, at)
+                slice_render = child_render.subsurface((0, fheight, cwidth, theight))
 
-                render.blit(crender.subsurface((0, fheight, cwidth, theight)), (offt, round(fheight)))
+                if offt and chroma:
+                    for color_mask, chponder in (((False, False, True, True), 1.25), ((False, True, False, True), 1.), ((True, False, False, True), .75)):
+                        chroma_render = slice_render.subsurface((0, 0, cwidth, theight))
+                        chroma_render.add_property("gl_color_mask", color_mask)
+                        render.blit(chroma_render, (round(offt*chponder), round(fheight)))
+
+                else:
+                    render.blit(slice_render, (offt, round(fheight)))
+
                 fheight += theight
                 if offt:
                     offt = 0
-                    crender = child_render
                 else:
                     offt = randomobj.randrange(-offset, offset+1)
 
