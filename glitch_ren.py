@@ -2,9 +2,13 @@
 init python:
 """
 class glitch(renpy.Displayable):
-    def __init__(self, child, *, randomkey=None, chroma=True, minbandheight=1, offset=30, **properties):
+    _stableseed = object()
+
+    def __init__(self, child, *, randomkey=_stableseed, chroma=True, minbandheight=1, offset=30, **properties):
         super().__init__(**properties)
         self.child = renpy.displayable(child)
+        if randomkey is self._stableseed:
+            randomkey = renpy.random.random()
         self.randomkey = randomkey
         self.chroma = chroma
         self.minbandheight = minbandheight
@@ -55,10 +59,14 @@ class glitch(renpy.Displayable):
         return [self.child]
 
 class squares_glitch(renpy.Displayable):
-    def __init__(self, child, *args, randomkey=None, **kwargs):
+    _stableseed = object()
+
+    def __init__(self, child, *args, randomkey=_stableseed, **kwargs):
         super().__init__()
         self.child = renpy.displayable(child)
         self.args = args
+        if randomkey is self._stableseed:
+            randomkey = renpy.random.random()
         self.randomkey = randomkey
         self.kwargs = kwargs
 
