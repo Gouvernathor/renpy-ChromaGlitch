@@ -152,13 +152,27 @@ class animated_glitch(glitch):
             return super().render(width, height, st, at)
 
 class squares_glitch(renpy.Displayable):
-    _stableseed = object()
+    """
+    `squareside`
+        The size, in pixels, of the side of the squares the child image will be cut to. This will
+        be adjusted so that all the "squares" (rectangles, really) have the same width and the
+        same height, and that none is cut at the borders of the image. Defaults to 20 pixels.
 
-    def __init__(self, child, *args, randomkey=_stableseed, **kwargs):
+    `chroma`
+        The probability for each square to get a chromatic effect. Defaults to .25.
+
+    `permutes`
+        The percentage of squares which will be moved to another square's place. If not passed,
+        defaults to a random value between .1 and .4.
+    """
+
+    NotSet = object()
+
+    def __init__(self, child, *args, randomkey=NotSet, **kwargs):
         super().__init__()
         self.child = renpy.displayable(child)
         self.args = args
-        if randomkey is self._stableseed:
+        if randomkey is self.NotSet:
             randomkey = renpy.random.random()
         self.randomkey = randomkey
         self.kwargs = kwargs
