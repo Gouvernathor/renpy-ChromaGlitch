@@ -2,12 +2,12 @@
 init python:
 """
 class glitch(renpy.Displayable):
-    _stableseed = object()
+    NotSet = object()
 
-    def __init__(self, child, *, randomkey=_stableseed, chroma=True, minbandheight=1, offset=30, **properties):
+    def __init__(self, child, *, randomkey=NotSet, chroma=True, minbandheight=1, offset=30, nslices=None, **properties):
         super().__init__(**properties)
         self.child = renpy.displayable(child)
-        if randomkey is self._stableseed:
+        if randomkey is self.NotSet:
             randomkey = renpy.random.random()
         self.randomkey = randomkey
         self.chroma = chroma
