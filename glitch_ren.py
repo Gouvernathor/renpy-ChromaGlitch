@@ -1,6 +1,8 @@
 """renpy
 init python:
 """
+import functools
+
 class glitch(renpy.Displayable):
     """
     `randomkey`
@@ -152,62 +154,84 @@ class animated_glitch(glitch):
             return super().render(width, height, st, at)
 
 class squares_glitch(renpy.Displayable):
-    _stableseed = object()
+    """
+    `squareside`
+        The size, in pixels, of the side of the squares the child image will be cut to. This will
+        be adjusted so that all the "squares" (rectangles, really) have the same width and the
+        same height, and that none is cut at the borders of the image. Defaults to 20 pixels.
 
-    def __init__(self, child, *args, randomkey=_stableseed, **kwargs):
-        super().__init__()
+    `chroma`
+        The probability for each square to get a chromatic effect. Defaults to .25.
+
+    `permutes`
+        The percentage of squares which will be moved to another square's place. If not passed,
+        defaults to a random value between .1 and .4.
+    """
+
+    NotSet = object()
+
+    def __init__(self, child, *, randomkey=NotSet, chroma=.25, squareside=20, permutes=None, **properties):
+        super().__init__(**properties)
         self.child = renpy.displayable(child)
-        self.args = args
-        if randomkey is self._stableseed:
+        if randomkey is self.NotSet:
             randomkey = renpy.random.random()
         self.randomkey = randomkey
-        self.kwargs = kwargs
+        self.chroma = chroma
+        self.squareside = squareside
+        if permutes is None:
+            permutes = (.1, .4)
+        self.permutes = permutes
 
     def render(self, width, height, st, at):
-        cwidth, cheight = renpy.render(self.child, width, height, st, at).get_size()
-        return renpy.render(self.glitch(self.child,
-                                        cwidth, cheight, renpy.random.Random(self.randomkey),
-                                        *self.args, **self.kwargs),
-                            width, height,
-                            st, at)
-
-    @staticmethod
-    def glitch(child, cwidth, cheight, randomobj, squareside=20, chroma=.25, permutes=None):
-        if not renpy.display.render.models:
-            chroma = False
+        child = self.child
+        child_render = renpy.render(child, width, height, st, at)
+        cwidth, cheight = child_render.get_size()
         if not (cwidth and cheight):
-            return child
+            return child_render
+        render = renpy.Render(cwidth, cheight)
+        randomobj = renpy.random.Random(self.randomkey)
+        chroma = renpy.display.render.models and self.chroma
+        squareside = self.squareside
+        permutes = self.permutes
 
-        ncols = round(cwidth/squareside)
-        nrows = round(cheight/squareside)
-        square_width = absolute(cwidth/ncols)
-        square_height = absolute(cheight/nrows)
+        mround = functools.cache(round)
 
-        lizt = []
-        for y in range(nrows):
-            for x in range(ncols):
-                lizt.append(Transform(child,
-                                        crop=(absolute(x*square_width), absolute(y*square_height), square_width, square_height),
-                                        subpixel=True,
-                                        ))
+        ncols = mround(cwidth/squareside)
+        nrows = mround(cheight/squareside)
+        square_width = cwidth/ncols
+        square_height = cheight/nrows
 
-        if permutes is None:
-            permutes = randomobj.randrange(10, 40)/100 # between 10% and 40%
-        permutes = round(permutes*ncols*nrows)
-        permute_a = randomobj.sample(range(ncols*nrows), permutes)
-        permute_b = randomobj.sample(range(ncols*nrows), permutes)
+        lizt = [] # list of subsurface renders
+        for x in range(ncols):
+            lisst = []
+            lizt.append(lisst)
+            xround = mround(x*square_width)
+            wround = mround((x+1)*square_width) - xround
+            for y in range(nrows):
+                yround = mround(y*square_height)
+                hround = mround((y+1)*square_height) - yround
+                lisst.append(child_render.subsurface((xround, yround, wround, hround)))
 
-        for a, b in zip(permute_a, permute_b):
-            lizt[a], lizt[b] = lizt[b], lizt[a]
+        if not isinstance(permutes, (int, float)):
+            permutes = randomobj.uniform(*permutes)
+        permutes = mround(permutes*ncols*nrows)
+        indices = [(x, y) for x in range(ncols) for y in range(nrows)]
+        permute_a = randomobj.sample(indices, permutes)
+        permute_b = randomobj.sample(indices, permutes)
 
-        for k, el in enumerate(lizt):
+        for (ax, ay), (bx, by) in zip(permute_a, permute_b):
+            lizt[ax][ay], lizt[bx][by] = lizt[bx][by], lizt[ax][ay]
+
+        for x, y in indices:
+            ss = lizt[x][y]
             if randomobj.random() < chroma:
-                lizt[k] = Transform(el,
-                                    gl_color_mask=(randomobj.random()<.33, randomobj.random()<.33, randomobj.random()<.33, True),
-                                    # matrixcolor=HueMatrix(randomobj.random()*360),
-                                    )
+                mask = [randomobj.random()<.33, randomobj.random()<.5, True]
+                randomobj.shuffle(mask)
+                mask.append(True)
+                ss.add_property("gl_color_mask", mask)
+            render.blit(ss, (mround(x*square_width), mround(y*square_height)))
 
-        return Grid(ncols, nrows, *lizt)
+        return render
 
-    def __eq__(self, other):
-        return (type(self) == type(other)) and (self.args == other.args) and (self.kwargs == other.kwargs)
+    def visit(self):
+        return [self.child]
