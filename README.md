@@ -34,6 +34,20 @@ image eileen glitched:
     repeat
 ```
 
+However, this last example using ATL will work poorly if and when "eileen happy" is itself an animation. This is because at the two lines starting with `glitch`, the child of the ATL animation is set again, and its animation timebase begins anew. This is (sadly for us) the expected behavior of ATL.
+Luckily for us, there is...
+
+## animated_glitch
+`animated_glitch` is a transform working much like `glitch`, except that it overhauls the `randomkey` mechanism. That parameter is changed and updated at parameterizable intervals of time, alternating (though that can be disabled) between vanilla (non-glitched) and glitched versions of the transformed image. Given that it's the same image, same displayable all the time, it doesn't reset anything like the ATL solution above did, which makes it perfectly suitable for use over animations.
+It takes the same parameters `glitch` does, plus the following ones :
+- `timeout_base` : the time in seconds between two randomkey changes. Can either be a single float (or integer) value, or a tuple if two values between which the actual periods of time will be randomly chosen following a uniform distribution (which is `randomkey`-wise deterministic). Defaults to .1 second.
+- `timeout_vanilla` : the same, for the periods of time during which the child image is shown without any glitching effect. If passed False, deactivates it - the image will always be glitched. If a `timeout_base` is passed, it default to that value, otherwise it defaults to `(1, 3)` (meaning a random duration each time, chosen randomly between 1 and 3 seconds).
+
+The glitchless ("vanilla") phases, unless deactivated of course, are generated this way :
+- the initial period is vanilla
+- if one period was vanilla, the next is glitched
+- if one period was glitched, the next has a 30% chance of being vanilla, otherwise it's glitched
+
 ## Squares glitch
 
 ![](sample_squares.png)

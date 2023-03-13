@@ -84,6 +84,73 @@ class glitch(renpy.Displayable):
     def visit(self):
         return [self.child]
 
+class animated_glitch(glitch):
+    """
+    Glitches in a way that changes over time, but consistently, unlike glitch(randomkey=None).
+    Sets a timeout at the beginning. At the end of each timeout, sets a new one and changes the glitching.
+
+    `timeout_base`
+        The time in seconds between two changes of the glitching.
+        Can be either single float (or integer) value, or a tuple of two values between which the timeout
+        will be chosen following a uniform distribution, respecting the randomkey.
+        Defaults to .1 second.
+
+    `timeout_vanilla`
+        The length in seconds of the periods of time over which the child will be shown without any glitch.
+        Same values and meaning as `timeout_base`, except that if False, the child will never be shown without glitching.
+        If `timeout_base` is passed, defaults to the same value. Otherwise, defaults to (1, 3).
+    """
+
+    def __init__(self, *args, timeout_base=None, timeout_vanilla=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if timeout_vanilla is None:
+            if timeout_base is None:
+                timeout_vanilla = (1, 3)
+            else:
+                timeout_vanilla = timeout_base
+        if timeout_base is None:
+            timeout_base = .1
+
+        self.timeout_base = timeout_base
+        self.timeout_vanilla = timeout_vanilla
+        self.set_timeout(vanilla=(timeout_vanilla is not False))
+
+    def set_timeout(self, vanilla, st=0):
+        if vanilla:
+            timeout = self.timeout_vanilla
+        else:
+            timeout = self.timeout_base
+
+        if not isinstance(timeout, (int, float)):
+            timeout = renpy.random.uniform(*timeout)
+
+        self.timeout = timeout + st
+        self.showing_vanilla = vanilla
+
+    def render(self, width, height, st, at):
+        vanilla = self.showing_vanilla
+
+        if st >= self.timeout:
+            randomkey = self.randomkey
+            randomobj = renpy.random.Random(randomkey)
+            self.randomkey = randomobj.random()
+
+            # determine whether to show vanilla or not
+            if vanilla or (self.timeout_vanilla is False):
+                # if we were showing it or if showing it is disabled
+                vanilla = False
+            else:
+                vanilla = (randomobj.random() < .3)
+
+            self.set_timeout(vanilla, st)
+
+        renpy.redraw(self, st-self.timeout)
+
+        if vanilla:
+            return renpy.render(self.child, width, height, st, at)
+        else:
+            return super().render(width, height, st, at)
+
 class squares_glitch(renpy.Displayable):
     _stableseed = object()
 
