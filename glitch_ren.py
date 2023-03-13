@@ -122,7 +122,7 @@ class animated_glitch(glitch):
             timeout = self.timeout_base
 
         if not isinstance(timeout, (int, float)):
-            timeout = renpy.random.uniform(*timeout)
+            timeout = renpy.random.Random(self.randomkey).uniform(*timeout)
 
         self.timeout = timeout + st
         self.showing_vanilla = vanilla
