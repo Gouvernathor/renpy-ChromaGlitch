@@ -13,6 +13,7 @@ class glitch(renpy.Displayable):
         self.chroma = chroma
         self.minbandheight = minbandheight
         self.offset = offset
+        self.nslices = nslices
 
     def render(self, width, height, st, at):
         child = self.child
@@ -25,8 +26,11 @@ class glitch(renpy.Displayable):
         chroma = self.chroma and renpy.display.render.models
         offset = self.offset
         minbandheight = self.minbandheight
+        nslices = self.nslices
+        if nslices is None:
+            nslices = min(int(cheight/minbandheight), randomobj.randrange(10, 21))
 
-        theights = sorted(randomobj.randrange(cheight+1) for k in range(min(cheight, randomobj.randrange(10, 21)))) # y coordinates demarcating all the strips
+        theights = sorted(randomobj.randrange(cheight+1) for k in range(nslices)) # y coordinates demarcating all the strips
         offt = 0 # next strip's lateral offset
         fheight = 0 # sum of the size of all the strips added this far
         while fheight<cheight:
