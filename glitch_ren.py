@@ -20,7 +20,7 @@ class glitch(renpy.Displayable):
         child_render = renpy.render(child, width, height, st, at)
         cwidth, cheight = child_render.get_size()
         if not (cwidth and cheight):
-            return child
+            return child_render
         render = renpy.Render(cwidth, cheight)
         randomobj = renpy.random.Random(self.randomkey)
         chroma = self.chroma and renpy.display.render.models
