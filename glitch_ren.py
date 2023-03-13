@@ -2,6 +2,28 @@
 init python:
 """
 class glitch(renpy.Displayable):
+    """
+    `randomkey`
+        Follows the rules of the random modume's seed function.
+        If not set, a random seed is generated when the transform is applied,
+        and stays the same afterwards.
+        If you want the effect to be random for each render operation, set to None.
+
+    `chroma`
+        Boolean, whether to apply the chromatic aberration effect.
+
+    `minbandheight`
+        Minimum height of each slice.
+
+    `offset`
+        The offset of each slice will be between -offset and offset pixels.
+
+    `nslices`
+        Number of slicings to do (the number of slices will be nslices + 1).
+        Setting this to 0 is not supported.
+        None (the default) makes it random.
+    """
+
     NotSet = object()
 
     def __init__(self, child, *, randomkey=NotSet, chroma=True, minbandheight=1, offset=30, nslices=None, **properties):
