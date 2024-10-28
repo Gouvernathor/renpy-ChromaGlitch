@@ -52,7 +52,7 @@ class glitch(renpy.Displayable):
         if nslices is None:
             nslices = min(int(cheight/minbandheight), randomobj.randrange(10, 21))
 
-        theights = sorted(randomobj.randrange(cheight+1) for k in range(nslices)) # y coordinates demarcating all the strips
+        theights = sorted(randomobj.randrange(int(cheight)+1) for k in range(nslices)) # y coordinates demarcating all the strips
         offt = 0 # next strip's lateral offset
         fheight = 0 # sum of the size of all the strips added this far
         while fheight<cheight:
